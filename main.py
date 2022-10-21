@@ -1,33 +1,29 @@
-import math
-import random as r
+import pyotp
 import smtplib
-import ssl
 
-digits = "0123456789"
-OTP = ""
+receiver_email = input("Enter your email: ")
 
-for i in range(6):
-    OTP += digits[math.floor(r.random()*10)]
+totp = pyotp.TOTP("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
-otp = OTP + " is your OTP"
+otp = totp.now()
 
-msg = otp
+# creates SMTP session
+sever = smtplib.SMTP('smtp.gmail.com', 25)
 
-port = 465
-email_id = input("Enter your email address: ")
-password = input("Type your password and press enter: ")
+# start TLS for security
+sever.starttls()
+
+# Authentication
+sever.login("developer4all36@gmail.com", "vieztopskzocmnlv")
 
 
-context = ssl.create_default_context()
+# message to be sent
+message = f"Hello there, your OTP: {otp}"
 
-with smtplib.SMTP_SSL(email_id, port, context=context) as server:
-    server.login(email_id, password)
 
-server.sendmail(email_id, msg)
+# sending the mail
+sever.sendmail("developer4all36@gmail.com", receiver_email, message)
 
-a = input("Enter Your OTP >>: ")
 
-if a == OTP:
-    print("Verified")
-else:
-    print("Not valid")
+# terminating the session
+sever.quit()
