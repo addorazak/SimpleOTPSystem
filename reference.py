@@ -27,7 +27,7 @@ message['Subject'] = "Password OTP"
 message.attach(MIMEText(f"Hello there, your OTP: {otp}", 'plain'))
 
 # sending the mail
-sever.sendmail("developer4all36@gmail.com", receiver_email,msg=message.as_string())
+sever.sendmail("developer4all36@gmail.com", receiver_email, msg=message.as_string())
 
 print("OTP Sent to your email")
 

@@ -1,29 +1,20 @@
-import pyotp
-import smtplib
-
-receiver_email = input("Enter your email: ")
-
-totp = pyotp.TOTP("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-
-otp = totp.now()
-
-# creates SMTP session
-sever = smtplib.SMTP('smtp.gmail.com', 25)
-
-# start TLS for security
-sever.starttls()
-
-# Authentication
-sever.login("developer4all36@gmail.com", "vieztopskzocmnlv")
+from otp_generator import otp_generator
 
 
-# message to be sent
-message = f"Hello there, your OTP: {otp}"
+otp = otp_generator()
 
+print("OTP Sent to your email")
 
-# sending the mail
-sever.sendmail("developer4all36@gmail.com", receiver_email, message)
+retries_count = 0
+retries_limit = 2
 
-
-# terminating the session
-sever.quit()
+while retries_count <= retries_limit:
+    received_otp = input("Enter the OTP received: ")
+    retries_count += 1
+    if received_otp == otp:
+        print('Verified')
+        break
+    else:
+        print('Not valid')
+else:
+    print('Please request for new otp')
