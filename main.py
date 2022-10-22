@@ -1,7 +1,9 @@
 from otp_generator import otp_generator
-
+from send_email import send_email
 
 otp = otp_generator()
+
+send_email()
 
 print("OTP Sent to your email")
 
