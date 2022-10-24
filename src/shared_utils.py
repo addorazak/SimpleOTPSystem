@@ -3,12 +3,24 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from config import configs
+from datetime import datetime
+
+# if the variable is not set, set the default time to 92s
+if not configs["OTP_EXPIRY_TIME"]:
+    configs["OTP_EXPIRY_TIME"] = 90
+
+# generate a random otp that expires after a certain amount of time set in OTP_EXPIRE_TIME
+totp = pyotp.TOTP(configs["OTP_SECRET"], interval=configs["OTP_EXPIRY_TIME"])
 
 
 def otp_generator():
-    totp = pyotp.TOTP(configs["OTP_SECRET"])
     otp = totp.now()
-    return otp
+    # get time remaining in seconds for otp to expire
+    time_remaining = int(totp.interval - datetime.now().timestamp() % totp.interval)
+    return {
+        "code": otp,
+        "expire": time_remaining,
+    }
 
 
 def send_email(otp, receiver_email):
@@ -27,7 +39,10 @@ def send_email(otp, receiver_email):
         message["From"] = "TestApp " + configs["SMTP_USER"]
         message["To"] = receiver_email
         message["Subject"] = "Password OTP"
-        message.attach(MIMEText(f"Hello there, your OTP: {otp}", "plain"))
+
+        email_content = f"""Hello there, your OTP: {otp["code"]} and expires in {otp["expire"]} seconds"""
+
+        message.attach(MIMEText(email_content, "plain"))
 
         # sending the mail
         server.sendmail(configs["SMTP_USER"], receiver_email, msg=message.as_string())
@@ -35,20 +50,21 @@ def send_email(otp, receiver_email):
         print("OTP Sent to your email")
 
     except Exception:
-        raise Exception("An error occurred while sending the email")
+        print("An error occurred while sending the email")
 
 
-def verify_otp(otp):
+def verify_otp():
     retries_count = 0
     retries_limit = 2
 
     while retries_count <= retries_limit:
         received_otp = input("Enter the OTP received: ")
         retries_count += 1
-        if received_otp == otp:
+
+        if totp.verify(received_otp):
             print("Verified")
             break
         else:
-            print("Not valid")
+            print("Not valid or otp may have expired")
     else:
         print("Please request for new otp. \n App exiting...")
