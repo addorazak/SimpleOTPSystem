@@ -7,10 +7,10 @@ from datetime import datetime
 
 # if the variable is not set, set the default time to 92s
 if not configs["OTP_EXPIRY_TIME"]:
-    configs["OTP_EXPIRY_TIME"] = 90
+    configs["OTP_EXPIRY_TIME"] = 30
 
 # generate a random otp that expires after a certain amount of time set in OTP_EXPIRE_TIME
-totp = pyotp.TOTP(configs["OTP_SECRET"], interval=configs["OTP_EXPIRY_TIME"])
+totp = pyotp.TOTP(configs["OTP_SECRET"], interval=int(configs["OTP_EXPIRY_TIME"]))
 
 
 def otp_generator():
@@ -68,3 +68,4 @@ def verify_otp():
             print("Not valid or otp may have expired")
     else:
         print("Please request for new otp. \n App exiting...")
+
